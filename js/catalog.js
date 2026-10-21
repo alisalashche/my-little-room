@@ -1,7 +1,3 @@
-// every card in the panel
-// on: where it may stand -> floor, wall, top (any surface facing up), bed (only on the bed)
-// models: object names inside room.glb
-// top: height of the surface other items can stand on, tops: every shelf board (for the grid)
 export const items = [
   // furniture
   { id: 'bed-frame', label: 'Bed frame', group: 'furniture', on: 'floor', models: ['Bed'], top: 0.52 },
@@ -12,7 +8,6 @@ export const items = [
   { id: 'tv', label: 'TV', group: 'furniture', on: 'top', models: ['TV'], top: 0.462 },
 
   // big decor
-  // rug: flat on the floor/hanging on a wall
   { id: 'persian-rug', label: 'Persian rug', group: 'big', on: 'floor wall', models: ['Rug_Floor'], wallModels: ['Rug_Wall'], max: 2, thumb: 'persian-rug-wall' },
   { id: 'beddings', label: 'Beddings', group: 'big', on: 'bed', models: ['Blanket', 'Pillow'] },
   { id: 'doll-house', label: 'Doll house', group: 'big', on: 'top', models: ['Dollhouse'] },
@@ -39,9 +34,6 @@ export const bedOffsets = {
   Pillow: [0, 0.555, -0.600],
 };
 
-// basics: materials inside room.glb 
-// options for each color multiplies with the texture
-// swatch is only for color of the btn
 export const basics = [
   {
     id: 'walls',
@@ -58,7 +50,6 @@ export const basics = [
     id: 'linoleum',
     label: 'Linoleum',
     materials: ['Linoleum'],
-    // other colours tint a grey copy of the linoleum texture
     options: [
       { label: 'Terracotta', color: '#ffffff', swatch: '#b5543a' },
       { label: 'Brown', color: '#8a5a44', texture: 'textures/linoleum-grey.jpg' },

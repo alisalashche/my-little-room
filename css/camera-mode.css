@@ -1,0 +1,182 @@
+/* camera mode overlay: frame, lens and shutter on top of the room */
+.shot {
+    position: absolute;
+    inset: 0;
+    cursor: grab;
+    touch-action: none;
+}
+
+.shot--dragging {
+    cursor: grabbing;
+}
+
+.shot__frame {
+    position: absolute;
+    inset: clamp(1rem, 4vw, 2.5rem);
+    pointer-events: none;
+}
+
+.shot__corner {
+    position: absolute;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0 solid var(--light);
+}
+
+.shot__corner--tl {
+    top: 0;
+    left: 0;
+    border-width: 3px 0 0 3px;
+}
+
+.shot__corner--tr {
+    top: 0;
+    right: 0;
+    border-width: 3px 3px 0 0;
+}
+
+.shot__corner--bl {
+    bottom: 0;
+    left: 0;
+    border-width: 0 0 3px 3px;
+}
+
+.shot__corner--br {
+    right: 0;
+    bottom: 0;
+    border-width: 0 3px 3px 0;
+}
+
+.shot__rec {
+    position: absolute;
+    top: 0.9rem;
+    left: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--light);
+    font-weight: 600;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+}
+
+.shot__rec:before {
+    content: '';
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--red);
+    animation: shot-blink 1.2s steps(1) infinite;
+}
+
+/* bottom bar, left of the finish button */
+.shot__bar {
+    position: absolute;
+    left: clamp(1.5rem, 5vw, 3.5rem);
+    bottom: clamp(1.5rem, 5vw, 3.2rem);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    max-width: calc(100% - 18rem);
+    cursor: default;
+}
+
+.shot__lens {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--light);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.shot__lens-input {
+    width: 7rem;
+    accent-color: var(--red);
+}
+
+.shot__hint {
+    color: var(--light);
+    font-size: 0.9rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.shot__shutter {
+    width: 3.6rem;
+    height: 3.6rem;
+    border: 4px solid var(--light);
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+}
+
+.shot__shutter:active {
+    transform: scale(0.92);
+}
+
+.shot__note {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    background: rgba(92, 0, 44, 0.85);
+    color: var(--light);
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.shot__flash {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.shot__flash--on {
+    animation: shot-flash 0.45s ease-out;
+}
+
+@keyframes shot-flash {
+    from {
+        opacity: 0.9;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes shot-blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+@media (max-width: 760px) {
+    .shot__bar {
+        left: 1rem;
+        right: 1rem;
+        bottom: 5rem;
+        max-width: none;
+        justify-content: center;
+        gap: 0.6rem;
+    }
+
+    .shot__lens-input {
+        width: 5rem;
+    }
+
+    .shot__hint {
+        display: none;
+    }
+}
+
+/* finish stays clickable above the overlay */
+.finish {
+    z-index: 2;
+}

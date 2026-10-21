@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { items, basics } from './catalog.js';
 import { createPanel } from './panel.js';
 import { createPlacement } from './placement.js';
+import { createCameraMode } from './camera-mode.js';
 
 const $play = document.querySelector('.play');
 const $stage = document.querySelector('.stage');
@@ -20,7 +21,7 @@ const VIEW_SIZE = 6.4; // world units visible from top to bottom
 const VIEW_WIDTH = 5.6; // world units the room needs from left to right (phones)
 const BACKGROUND = '#8c865c';
 
-let renderer, scene, camera, placement, panel;
+let renderer, scene, camera, placement, panel, cameraMode;
 const materials = {}; // name - material from the glb
 const originals = {}; // name - { color, map } to undo a basic option
 const textureLoader = new THREE.TextureLoader();
@@ -49,6 +50,8 @@ const init = async () => {
 
   const room = await loadRoom();
   setupPlay(room);
+
+  cameraMode = createCameraMode({ renderer, scene, camera, $stage });
 
   $loading.hidden = true;
   renderer.setAnimationLoop(draw);
@@ -221,10 +224,13 @@ const setupPlay = ({ root, templates }) => {
   applyBasic(basics[0], basics[0].options[0]);
 };
 
-// finish: hide the panel and look at the room 
 const toggleFinish = () => {
   const done = $play.classList.toggle('play--done');
-  $finish.textContent = done ? 'Edit room' : 'Finish';
+  $finish.textContent = done ? 'Back to edit' : 'Take picture';
+
+  if (done) cameraMode.enter();
+  else cameraMode.exit();
+
   placement.cancel();
   placement.clearSelection();
   requestAnimationFrame(resize);
@@ -234,7 +240,7 @@ const resize = () => {
   const width = $stage.clientWidth;
   const height = $stage.clientHeight;
   renderer.setSize(width, height, false);
-  
+
   // fit the room in both directions
   const aspect = width / height;
   const half = Math.max(VIEW_SIZE / 2, VIEW_WIDTH / 2 / aspect);
@@ -247,7 +253,8 @@ const resize = () => {
 
 const draw = () => {
   placement?.update();
-  renderer.render(scene, camera);
+  if (cameraMode?.active) cameraMode.render();
+  else renderer.render(scene, camera);
 };
 
 $finish.addEventListener('click', toggleFinish);
