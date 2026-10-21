@@ -16,12 +16,13 @@ const $finish = document.querySelector('.finish');
 // iso camera like the blender renders: 45° around, 33° down
 const VIEW_DIRECTION = new THREE.Vector3(1, 0.92, 1).normalize();
 const VIEW_TARGET = new THREE.Vector3(-0.1, 0.95, -0.1);
-const VIEW_SIZE = 6.4;
-const BACKGROUND = '#8f8a5f';
+const VIEW_SIZE = 6.4; // world units visible from top to bottom
+const VIEW_WIDTH = 5.6; // world units the room needs from left to right (phones)
+const BACKGROUND = '#8c865c';
 
 let renderer, scene, camera, placement, panel;
-const materials = {}; // name -> material from the glb
-const originals = {}; // name -> { color, map } to undo a basic option
+const materials = {}; // name - material from the glb
+const originals = {}; // name - { color, map } to undo a basic option
 const textureLoader = new THREE.TextureLoader();
 
 const init = async () => {
@@ -54,7 +55,7 @@ const init = async () => {
 };
 
 const addLights = () => {
-  // soft warm sky + olive bounce from below
+  // soft warm sky, olive bounce, from below
   scene.add(new THREE.HemisphereLight(0xfff0dc, 0x8f8a5f, 1.6));
 
   // warm key light from the open side of the room, casts the shadows
@@ -71,7 +72,7 @@ const addLights = () => {
   sun.shadow.radius = 4;
   scene.add(sun);
 
-  // cosy glow inside the room, like a ceiling lamp
+  // cosy glow like from ceiling lamp
   const lamp = new THREE.PointLight(0xffc98a, 6, 6, 1.5);
   lamp.position.set(-0.4, 2.3, -0.4);
   scene.add(lamp);
@@ -117,11 +118,11 @@ const loadRoom = async () => {
   return { root, templates };
 };
 
-// small fixes for see-through materials
+// fixes for partialy transparen materials
 const fixMaterial = (material, mesh) => {
   const { name } = material;
   if (name.startsWith('Mohair_Fur')) {
-    // fur shells: cut out instead of blending, no sorting problems
+    // fur shells (cut out instead of blending , so no sorting problems)
     material.transparent = false;
     material.alphaTest = 0.5;
     mesh.castShadow = false;
@@ -132,6 +133,13 @@ const fixMaterial = (material, mesh) => {
     material.depthWrite = false;
     mesh.castShadow = name === 'Frog_Net';
   }
+  if (name.startsWith('Persian_Rug')) {
+    // no velvet sheen ( washed the red out to pink)
+    material.sheen = 0;
+    material.roughness = 1;
+    material.metalness = 0;
+    material.envMapIntensity = 0;
+  }
   if (name === 'Window_Glass') {
     material.transparent = true;
     material.depthWrite = false;
@@ -140,22 +148,22 @@ const fixMaterial = (material, mesh) => {
 };
 
 const textures = {};
-// plain white texture for painted wood (a missing map breaks the shadow pass in webgpu)
+// plain white texture for painted wood (missing map breaks the shadow pass in webgpu)
 const blank = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
 blank.needsUpdate = true;
-const loadTexture = (url, repeat = 1) => {
+const loadTexture = (url, repeat = [1, 1]) => {
   if (!textures[url]) {
     const texture = textureLoader.load(url);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.flipY = false;
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(repeat, repeat);
+    texture.repeat.set(...repeat);
     textures[url] = texture;
   }
   return textures[url];
 };
 
-// basics: recolour walls, linoleum and wood
+// basics recolor: walls, linoleum, and wood
 const applyBasic = (basic, option) => {
   basic.materials.forEach((name) => {
     const material = materials[name];
@@ -213,7 +221,7 @@ const setupPlay = ({ root, templates }) => {
   applyBasic(basics[0], basics[0].options[0]);
 };
 
-// finish: hide the panel and look at the room (camera mode with the sketch shader comes next)
+// finish: hide the panel and look at the room 
 const toggleFinish = () => {
   const done = $play.classList.toggle('play--done');
   $finish.textContent = done ? 'Edit room' : 'Finish';
@@ -226,9 +234,10 @@ const resize = () => {
   const width = $stage.clientWidth;
   const height = $stage.clientHeight;
   renderer.setSize(width, height, false);
+  
   // fit the room in both directions
   const aspect = width / height;
-  const half = Math.max(VIEW_SIZE / 2, VIEW_SIZE / 2 / aspect);
+  const half = Math.max(VIEW_SIZE / 2, VIEW_WIDTH / 2 / aspect);
   camera.left = -half * aspect;
   camera.right = half * aspect;
   camera.top = half;

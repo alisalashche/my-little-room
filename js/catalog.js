@@ -1,18 +1,18 @@
 // every card in the panel
 // on: where it may stand -> floor, wall, top (any surface facing up), bed (only on the bed)
 // models: object names inside room.glb
-// top: height of the surface other items can stand on
+// top: height of the surface other items can stand on, tops: every shelf board (for the grid)
 export const items = [
   // furniture
   { id: 'bed-frame', label: 'Bed frame', group: 'furniture', on: 'floor', models: ['Bed'], top: 0.52 },
   { id: 'desk', label: 'Desk', group: 'furniture', on: 'floor', models: ['Desk'], top: 0.775 },
   { id: 'night-stand', label: 'Night stand', group: 'furniture', on: 'floor', models: ['Nightstand_TV'], max: 2, top: 0.56 },
-  { id: 'shelf', label: 'Shelf', group: 'furniture', on: 'wall', models: ['Wall_Shelf'] },
+  { id: 'shelf', label: 'Shelf', group: 'furniture', on: 'wall', models: ['Wall_Shelf'], top: 0.55, tops: [0.02, 0.28, 0.55] },
   { id: 'chair', label: 'Chair', group: 'furniture', on: 'floor', models: ['Chair'] },
   { id: 'tv', label: 'TV', group: 'furniture', on: 'top', models: ['TV'], top: 0.462 },
 
   // big decor
-  // the rug changes model: flat on the floor, hanging on a wall
+  // rug: flat on the floor/hanging on a wall
   { id: 'persian-rug', label: 'Persian rug', group: 'big', on: 'floor wall', models: ['Rug_Floor'], wallModels: ['Rug_Wall'], max: 2, thumb: 'persian-rug-wall' },
   { id: 'beddings', label: 'Beddings', group: 'big', on: 'bed', models: ['Blanket', 'Pillow'] },
   { id: 'doll-house', label: 'Doll house', group: 'big', on: 'top', models: ['Dollhouse'] },
@@ -34,24 +34,24 @@ export const items = [
   { id: 'syngonium', label: 'Syngonium', group: 'small', on: 'top', models: ['Plant_Trailing'] },
 ];
 
-// beddings sit on the bed exactly like in the style guide (offsets from the bed origin)
 export const bedOffsets = {
-  Blanket: [0.029, 0.52, 0.315],
-  Pillow: [0, 0.555, 0.675],
+  Blanket: [0.029, 0.52, 0.150],
+  Pillow: [0, 0.555, -0.600],
 };
 
-// basics: materials inside room.glb and the options for each
-// color multiplies with the texture, swatch is only the colour of the button
+// basics: materials inside room.glb 
+// options for each color multiplies with the texture
+// swatch is only for color of the btn
 export const basics = [
   {
     id: 'walls',
     label: 'Walls',
     materials: ['Wall_Paint'],
     options: [
-      { label: 'White', color: '#f4efe6' },
-      { label: 'Wallpaper', color: '#ffffff', texture: 'textures/wallpaper.jpg', repeat: 0.6 },
-      { label: 'Butter', color: '#f6e7b4' },
-      { label: 'Sage', color: '#b9b892' },
+      { label: 'White', color: '#eeece6' },
+      { label: 'Wallpaper', color: '#ffffff', texture: 'textures/wallpaper-print.jpg', repeat: [2.6, 1.3] },
+      { label: 'Butter', color: '#ffeaaf' },
+      { label: 'Sage', color: '#a39e7b' },
     ],
   },
   {

@@ -2,41 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>My Little Room</title>
+    <link rel="icon" href="logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mohave:wght@600;700&family=Saira+Extra+Condensed:wght@900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
     <main class="play">
-        <aside class="panel">
-            <h1 class="panel__title">My Little <span class="panel__title-big">Room</span></h1>
+        <aside class="panel" data-tab="basics">
+            <h1 class="panel__title">
+                <img class="panel__logo" src="logo.svg" alt="My Little Room" width="179" height="119">
+            </h1>
 
-            <section class="panel__section">
+            <!-- tabs only show on phones, on desktop every section is visible -->
+            <nav class="tabs" aria-label="Categories">
+                <button class="tabs__tab" type="button" data-tab="basics">Basics</button>
+                <button class="tabs__tab" type="button" data-tab="furniture">Furniture</button>
+                <button class="tabs__tab" type="button" data-tab="big">Big decor</button>
+                <button class="tabs__tab" type="button" data-tab="small">Small decor</button>
+            </nav>
+
+            <section class="panel__section" data-tab="basics">
                 <h2 class="panel__heading">Basics</h2>
-                <ul class="cards cards--basics"></ul>
+                <div class="row">
+                    <ul class="cards cards--basics"></ul>
+                </div>
                 <ul class="swatches" hidden></ul>
             </section>
 
-            <section class="panel__section">
+            <section class="panel__section" data-tab="furniture">
                 <h2 class="panel__heading">Furniture</h2>
-                <ul class="cards" data-group="furniture"></ul>
+                <div class="row">
+                    <ul class="cards" data-group="furniture"></ul>
+                </div>
             </section>
 
-            <section class="panel__section">
+            <section class="panel__section" data-tab="big">
                 <h2 class="panel__heading">Big decor</h2>
-                <ul class="cards" data-group="big"></ul>
+                <div class="row">
+                    <ul class="cards" data-group="big"></ul>
+                </div>
             </section>
 
-            <section class="panel__section">
+            <section class="panel__section" data-tab="small">
                 <h2 class="panel__heading">Small decor</h2>
-                <ul class="cards" data-group="small"></ul>
+                <div class="row">
+                    <ul class="cards" data-group="small"></ul>
+                </div>
             </section>
-
-            <p class="panel__help">Pick an item, then click in the room to place it. Drag to move, <kbd>R</kbd> to rotate, <kbd>Del</kbd> to remove, <kbd>Esc</kbd> to cancel.</p>
         </aside>
 
         <section class="stage">
@@ -45,9 +62,15 @@
             <p class="stage__hint" hidden></p>
 
             <div class="tools" hidden>
-                <button class="tools__button tools__button--left" type="button" aria-label="Rotate left">⟲</button>
-                <button class="tools__button tools__button--right" type="button" aria-label="Rotate right">⟳</button>
-                <button class="tools__button tools__button--delete" type="button" aria-label="Remove item">✕</button>
+                <button class="tools__button tools__button--left" type="button" aria-label="Turn left">
+                    <svg class="tools__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 3.5v4.5h4.5"/></svg>
+                </button>
+                <button class="tools__button tools__button--right" type="button" aria-label="Turn right">
+                    <svg class="tools__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 3.5v4.5h-4.5"/></svg>
+                </button>
+                <button class="tools__button tools__button--delete" type="button" aria-label="Remove item">
+                    <svg class="tools__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
             </div>
 
             <button class="finish" type="button" disabled>Finish</button>

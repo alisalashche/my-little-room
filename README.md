@@ -38,4 +38,4 @@ Controls: click a card, click in the room to place. Drag to move, R to turn (Shi
 - 3D models and textures: made in Blender with Python, AI-assisted (Claude), art direction and optimisation by me
 - Code: written with help from Claude (AI-assisted)
 - three.js r186 (WebGPURenderer), Vite
-- Fonts: Anton and Oswald (Google Fonts)
+- Fonts: Mohave and Saira Extra Condensed (Google Fonts)

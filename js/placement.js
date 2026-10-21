@@ -6,16 +6,17 @@ const RED = 0xe0453a;
 const SNAP = 0.05;
 const ROTATE_STEP = Math.PI / 4;
 const HINTS = {
-  floor: 'Point at the floor',
-  wall: 'Point at a wall',
-  'floor wall': 'Point at the floor or a wall',
-  top: 'Point at the floor or a furniture top',
-  bed: 'Point at the bed',
+  floor: 'Choose a spot on the floor',
+  wall: 'Choose a spot on a wall',
+  'floor wall': 'Choose a spot on the floor or a wall',
+  top: 'Choose the floor or a blue furniture top',
+  bed: 'Choose the bed',
 };
 
 const snap = (value) => Math.round(value / SNAP) * SNAP;
 
-// thin blue lines every `cell` metres on a w x h plane (xy plane, centred)
+// thin blue lines every cell metres on a w x h plane 
+// (xy plane, centred)
 const makeGrid = (w, h, cell = 0.3) => {
   const group = new THREE.Group();
   const fill = new THREE.Mesh(
@@ -40,7 +41,7 @@ const makeGrid = (w, h, cell = 0.3) => {
 export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds, templates, floor, onChange }) => {
   const { left, back, right, front, height } = bounds;
 
-  // every placed item lives in this layer (or is attached to a furniture inside it)
+  // every placed item lives in this layer (or is attached to furniture inside it)
   const layer = new THREE.Group();
   layer.name = 'placed';
   scene.add(layer);
@@ -50,7 +51,7 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
   const box = new THREE.Box3();
 
   // state
-  let mode = 'idle'; // idle | placing | dragging
+  let mode = 'idle'; // idle / placing / dragging
   let active = null; // item following the pointer
   let selected = null;
   let lastHit = null;
@@ -85,10 +86,56 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
   highlight.visible = false;
   scene.add(highlight);
 
+  // grids on furniture tops (desk, bed, nightstand, tv, shelf boards) while a small item looks for a spot
+  const topGrids = [];
+  const localBox = (root) => {
+    // box of the furniture in its own space, so the grid can turn with it
+    const inverse = root.matrixWorld.clone().invert();
+    const local = new THREE.Box3();
+    root.children.filter((child) => !child.userData.item && !child.userData.grid).forEach((part) => {
+      part.traverse((mesh) => {
+        if (!mesh.isMesh) return;
+        if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+        const matrix = inverse.clone().multiply(mesh.matrixWorld);
+        local.union(mesh.geometry.boundingBox.clone().applyMatrix4(matrix));
+      });
+    });
+    return local;
+  };
+
+  const addTopGrids = (except) => {
+    layer.updateMatrixWorld(true);
+    layer.traverse((root) => {
+      const { item } = root.userData;
+      if (!item || root === except || isInside(root, except)) return;
+      const tops = item.tops || (item.top !== undefined ? [item.top] : []);
+      if (!tops.length) return;
+      const local = localBox(root);
+      const size = local.getSize(new THREE.Vector3());
+      const centre = local.getCenter(new THREE.Vector3());
+      tops.forEach((top) => {
+        const grid = makeGrid(size.x - 0.04, size.z - 0.04, 0.1);
+        grid.userData.grid = true;
+        grid.rotation.x = -Math.PI / 2;
+        grid.position.set(centre.x, top + 0.004, centre.z);
+        grid.visible = true;
+        root.add(grid);
+        topGrids.push(grid);
+      });
+    });
+  };
+
+  const removeTopGrids = () => {
+    topGrids.forEach((grid) => grid.removeFromParent());
+    topGrids.length = 0;
+  };
+
   const showGrids = (on = '') => {
     grids.floor.visible = on.includes('floor') || on.includes('top');
     grids.left.visible = on.includes('wall');
     grids.back.visible = on.includes('wall');
+    removeTopGrids();
+    if (on === 'top') addTopGrids(active);
   };
 
   // the placed item an object belongs to (meshes sit a few levels deep)
@@ -115,7 +162,7 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
     return count;
   };
 
-  // build a fresh copy of the models of a catalog item
+  //fresh copy of the models of a catalog item
   const fillModels = (root, variant) => {
     const { item } = root.userData;
     // drop old model parts, keep items that stand on it
@@ -139,7 +186,7 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
     return root;
   };
 
-  // find the surface under the pointer that this item may stand on
+  // find surface under the pointer that this item may stand on
   const hitSurface = (on, exclude) => {
     raycaster.setFromCamera(pointer, camera);
     const { ray } = raycaster;
@@ -150,14 +197,14 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
       layer.traverse((child) => {
         if (child.userData.item?.id === 'bed-frame') beds.push(child);
       });
-      const hit = raycaster.intersectObjects(beds, true)[0];
+      const hit = raycaster.intersectObjects(beds, true).find((h) => h.object.isMesh);
       return hit ? { kind: 'bed', point: hit.point, parent: placedOf(hit.object) } : null;
     }
 
     // any surface facing up: floor, desk, bed, nightstand, shelf, tv...
     if (on === 'top') {
       const hits = raycaster.intersectObjects([floor, layer], true)
-        .filter((hit) => hit.object.visible && !isInside(hit.object, exclude));
+        .filter((hit) => hit.object.isMesh && hit.object.visible && !isInside(hit.object, exclude));
       const hit = hits[0];
       if (!hit?.face) return null;
       const normal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
@@ -203,7 +250,7 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
   // box of the item itself, without what stands on it
   const modelBox = (root) => {
     box.makeEmpty();
-    root.children.filter((child) => !child.userData.item).forEach((child) => box.expandByObject(child));
+    root.children.filter((child) => !child.userData.item && !child.userData.grid).forEach((child) => box.expandByObject(child));
     return box;
   };
 
@@ -340,6 +387,8 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
     updatePointer(event);
 
     if (mode === 'placing') {
+      // touch screens have no hover: find the spot under the finger first
+      follow();
       if (!lastHit || active.userData.blocked) return;
       drop();
       const placed = active;
@@ -351,9 +400,11 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
       return;
     }
 
-    // grab an item that is already in the room
+    // grab item that is already in the room
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObject(layer, true).find((h) => h.object.visible);
+    
+    // only real meshes, not the grid lines or the see-through grid planes
+    const hit = raycaster.intersectObject(layer, true).find((h) => h.object.isMesh && h.object.visible && !h.object.parent?.userData.grid);
     const object = hit && placedOf(hit.object);
     select(object || null);
     if (!object) return;
@@ -411,7 +462,7 @@ export const createPlacement = ({ scene, camera, $canvas, $tools, $hint, bounds,
   $tools.querySelector('.tools__button--right').addEventListener('click', () => rotate(1));
   $tools.querySelector('.tools__button--delete').addEventListener('click', remove);
 
-  // every frame: blue box + tools follow the selected item
+  // every frame: blue box + tools for selected item
   const update = () => {
     const target = mode === 'placing' && active?.visible ? active : selected;
     highlight.visible = !!target;

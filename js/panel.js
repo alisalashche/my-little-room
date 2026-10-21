@@ -1,9 +1,8 @@
 // left panel: catalog cards, basics and their colour swatches
-
 const BASIC_THUMBS = {
-  walls: 'textures/wallpaper.jpg',
-  linoleum: 'textures/linoleum.jpg',
-  furniture: 'textures/oak.jpg',
+  walls: 'url(textures/wallpaper-print.jpg) center / 140% auto',
+  linoleum: '#813d2e',
+  furniture: 'url(textures/oak.jpg) center / cover',
 };
 
 const makeCard = ({ id, label, thumb, max = 1, image = true }) => {
@@ -20,7 +19,7 @@ const makeCard = ({ id, label, thumb, max = 1, image = true }) => {
     $thumb.alt = '';
     $thumb.loading = 'lazy';
   } else {
-    $thumb.style.backgroundImage = `url(${thumb})`;
+    $thumb.style.background = thumb;
   }
   const $label = document.createElement('span');
   $label.classList.add('card__label');
@@ -39,6 +38,7 @@ const makeCard = ({ id, label, thumb, max = 1, image = true }) => {
 export const createPanel = ({ items, basics, onPick, onBasic, countOf, placingId }) => {
   const $basics = document.querySelector('.cards--basics');
   const $swatches = document.querySelector('.swatches');
+  const $panel = document.querySelector('.panel');
   let openBasic = null;
   const chosen = {}; // basic id -> option index
 
@@ -48,7 +48,7 @@ export const createPanel = ({ items, basics, onPick, onBasic, countOf, placingId
     $list.append(makeCard(item));
   });
 
-  // basics cards
+  // basics cads
   basics.forEach((basic) => {
     chosen[basic.id] = 0;
     $basics.append(makeCard({ ...basic, thumb: BASIC_THUMBS[basic.id], image: false }));
@@ -94,7 +94,28 @@ export const createPanel = ({ items, basics, onPick, onBasic, countOf, placingId
     });
   };
 
-  document.querySelector('.panel').addEventListener('click', (event) => {
+  // fade on the right edge of a row, gone when scrolled to the end
+  const updateFade = ($row) => {
+    const $cards = $row.querySelector('.cards');
+    const end = $cards.scrollLeft + $cards.clientWidth >= $cards.scrollWidth - 4;
+    $row.classList.toggle('row--end', end);
+  };
+  const $rows = document.querySelectorAll('.row');
+  $rows.forEach(($row) => {
+    $row.querySelector('.cards').addEventListener('scroll', () => updateFade($row), { passive: true });
+  });
+  const updateFades = () => $rows.forEach(updateFade);
+  window.addEventListener('resize', updateFades);
+
+  //show one tab at a time
+  document.querySelectorAll('.tabs__tab').forEach(($tab) => {
+    $tab.addEventListener('click', () => {
+      $panel.dataset.tab = $tab.dataset.tab;
+      updateFades();
+    });
+  });
+
+  $panel.addEventListener('click', (event) => {
     const $card = event.target.closest('.card');
     if (!$card) return;
     const { id } = $card.dataset;
@@ -109,5 +130,6 @@ export const createPanel = ({ items, basics, onPick, onBasic, countOf, placingId
   });
 
   refresh();
+  updateFades();
   return { refresh };
 };
