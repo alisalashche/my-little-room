@@ -57,63 +57,6 @@ Controls:
 - `Delete` to remove
 - `Esc` to cancel
 ---
-# Development process
-## 1. Start project and deployment
-1. `npm create vite@latest`, then `npm install three`
-2. `vite.config.js` with base, so the built files work in a subfolder `alisalashche.github.io/my-little-room/.`
-```js
-export default {
-  base: './',
-};
-```
-3. A GitHub Actions workflow that runs `npm run build` and publishes `dist/` to GitHub Pages on every push with Claude
-4. Adding `index.html` with `canva`, assets in public in subfolders, reset and my default CSS file, `script.js`, and importing ThreeJS
-5. First build and commit (since I initilly had another idea I also renamed my project folder and githup repo to ename to `my-little-room`, and updated actions to node 24)
-
-## 2. 3D models rendering
-1. I addded rendered, scene, and orthograhic camera (not perspective, because I don't need perspective to render static isometric view)
-```js
-renderer = new THREE.WebGPURenderer({ canvas: $canvas, antialias: true });
-scene = new THREE.Scene();
-scene.background = new THREE.Color('#8c865c');
-
-camera = new THREE.OrthographicCamera();
-camera.position.copy(VIEW_TARGET).addScaledVector(VIEW_DIRECTION, 20);
-camera.lookAt(VIEW_TARGET);
-renderer.setAnimationLoop(() => renderer.render(scene, camera));
-```
-2. Loading static part of the room (no furniture) by loading only things from blender file that has name starting with  `Room_`, other things become templates for later 
-```js
-const gltf = await new GLTFLoader().loadAsync('models/room.glb');
-const templates = {};
-[...root.children].forEach((child) => {
-  if (child.name.startsWith('Room_')) return; 
-  templates[child.name] = child;
-});
-Object.values(templates).forEach((template) => template.removeFromParent());
-```
-3. Creating `catalog.js`
-    - items (every card with item in the panel)
-        - object names inside `room.glb`
-        - where it may stand -> floor, wall, top (any surface facing up), bed (only on the bed)
-        - height of the surface other items can stand on calculated by Claude
-    - basics (materials inside `room.glb` )
-        - options for each color multiplies with the texture
-        - swatch is only for color of the btn
-    - bedding placment offset, that I fine tuned later
-
-4. I wrote HTML for my play screen (logo, btn, side panel) and styled them using Claude connected to my figma design
-
-6. I also used Claude to fix some mistakes with new functions and reorganize code. Major changes: 
-    - `fixMaterial()` to fix specific materials that could not render properly, like
-        - fur on plushie needed `alphaTest`
-        - `DoubleSide` for lace 
-        - the rug sheen washd the red out to pink  
-    - `resize()` to fix canvas size on a phone + HTML and CSS for tabs instead of sections in mobile version 
-
-
-
-
 ## Links & credits
 
 - Online: https://alisalashche.github.io/my-little-room/
@@ -127,6 +70,6 @@ Object.values(templates).forEach((template) => template.removeFromParent());
 
 - Shader: https://www.shadertoy.com/view/Xl3cDn
 
-- Code writting and learning assisted by Claude + Code Caude used for correcting/formatting code
+- Claude used in this project for: planing the project, tutoring in code writting and debugging, 3d models generating + Code Caude for correcting/formatting code
 
 
