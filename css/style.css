@@ -1,4 +1,15 @@
-:root { 
+:root {
+    --panel: #e9e6df;
+    --card: #ffffff;
+    --thumb: #a9a37a;
+    --red: #8e2420;
+    --red-dark: #6e1714;
+    --ink: #3b2a22;
+    --olive: #8f8a5f;
+    --muted: #77735a;
+    --blue: #3d6bff;
+    --title-font: 'Anton', 'Impact', sans-serif;
+    --label-font: 'Oswald', 'Arial Narrow', sans-serif;
 }
 
 html {
@@ -14,22 +25,277 @@ html {
 html,
 body {
     height: 100vh;
+    overflow: hidden;
+    background: var(--olive);
+    color: var(--ink);
+    font-family: var(--label-font);
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
+[hidden] {
+    display: none !important;
 }
 
-canvas{
+/* layout: panel left, room right */
+.play {
+    display: grid;
+    grid-template-columns: minmax(18rem, 40%) 1fr;
+    height: 100vh;
+}
+
+.play--done {
+    grid-template-columns: 0 1fr;
+}
+
+.play--done .panel {
+    visibility: hidden;
+}
+
+/* panel */
+.panel {
+    background: var(--panel);
+    overflow-y: auto;
+    padding: 2rem 0 2rem 2.4rem;
+}
+
+.panel__title {
+    font-family: var(--title-font);
+    color: var(--red);
+    font-size: 2.2rem;
+    line-height: 0.9;
+    text-transform: none;
+    margin-bottom: 1.6rem;
+}
+
+.panel__title-big {
+    display: block;
+    font-size: 3.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.panel__section {
+    margin-bottom: 1.4rem;
+}
+
+.panel__heading {
+    font-family: var(--title-font);
+    color: var(--red-dark);
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 0.6rem;
+}
+
+.panel__help {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--muted);
+    padding-right: 2rem;
+}
+
+.panel__help kbd {
+    font-family: inherit;
+    padding: 0 0.3rem;
+    border: 1px solid currentColor;
+    border-radius: 0.2rem;
+}
+
+/* horizontal rows of cards */
+.cards {
+    display: flex;
+    gap: 0.6rem;
+    overflow-x: auto;
+    padding: 0.2rem 2.4rem 0.6rem 0.2rem;
+    list-style: none;
+    scrollbar-width: thin;
+    mask-image: linear-gradient(to right, black 85%, transparent);
+}
+
+.cards--basics {
+    mask-image: none;
+}
+
+.cards__item {
+    flex: 0 0 auto;
+}
+
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 5.6rem;
+    padding: 0.35rem 0.35rem 0.45rem;
+    border: none;
+    background: var(--card);
+    box-shadow: 0 1px 2px rgba(59, 42, 34, 0.15);
+    cursor: pointer;
+    font: inherit;
+    color: var(--ink);
+    text-align: left;
+    transition: transform 0.15s, background-color 0.15s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+}
+
+.card__thumb {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    background: radial-gradient(circle at 50% 40%, #c4bf98, var(--thumb));
+    background-size: cover;
+}
+
+.card__label {
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card__badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.6rem;
+    color: #fff;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.card--active {
+    background: var(--red);
+    color: #fff;
+}
+
+.card--used {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.card--used:hover {
+    transform: none;
+}
+
+/* colour options for basics */
+.swatches {
+    display: flex;
+    gap: 0.6rem;
+    list-style: none;
+    margin-top: 0.4rem;
+}
+
+.swatch {
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 1px solid rgba(59, 42, 34, 0.2);
+    border-radius: 0.3rem;
+    background-size: cover;
+    background-blend-mode: multiply;
+    cursor: pointer;
+}
+
+.swatch--active {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+}
+
+/* room */
+.stage {
+    position: relative;
+    overflow: hidden;
+}
+
+.stage__canvas {
+    display: block;
     width: 100%;
     height: 100%;
-    position: fixed;
-    display: block;
+    touch-action: none;
+}
+
+.stage__loading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--title-font);
+    font-size: 1.4rem;
+    color: var(--panel);
+}
+
+.stage__hint {
+    position: absolute;
+    left: 50%;
+    bottom: 1.8rem;
+    transform: translateX(-50%);
+    padding: 0.4rem 0.9rem;
+    border-radius: 1rem;
+    background: rgba(59, 42, 34, 0.75);
+    color: var(--panel);
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* rotate / delete buttons above the selected item */
+.tools {
+    position: absolute;
+    display: flex;
+    gap: 0.3rem;
+    transform: translate(-50%, calc(-100% - 0.6rem));
+}
+
+.tools__button {
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.tools__button--delete {
+    background: var(--red);
+}
+
+.tools--fixed .tools__button--left,
+.tools--fixed .tools__button--right {
+    display: none;
+}
+
+/* finish */
+.finish {
+    position: absolute;
+    right: 1.6rem;
+    bottom: 1.6rem;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: var(--red);
+    color: #fff;
+    font-family: var(--title-font);
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.finish:disabled {
+    background: var(--muted);
+    color: var(--panel);
+    cursor: default;
 }

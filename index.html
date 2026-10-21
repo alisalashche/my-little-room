@@ -3,12 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dacha</title>
-    <link rel="stylesheet" href="./css//reset.css">
+    <title>My Little Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <canvas class="canvas"></canvas>
+    <main class="play">
+        <aside class="panel">
+            <h1 class="panel__title">My Little <span class="panel__title-big">Room</span></h1>
+
+            <section class="panel__section">
+                <h2 class="panel__heading">Basics</h2>
+                <ul class="cards cards--basics"></ul>
+                <ul class="swatches" hidden></ul>
+            </section>
+
+            <section class="panel__section">
+                <h2 class="panel__heading">Furniture</h2>
+                <ul class="cards" data-group="furniture"></ul>
+            </section>
+
+            <section class="panel__section">
+                <h2 class="panel__heading">Big decor</h2>
+                <ul class="cards" data-group="big"></ul>
+            </section>
+
+            <section class="panel__section">
+                <h2 class="panel__heading">Small decor</h2>
+                <ul class="cards" data-group="small"></ul>
+            </section>
+
+            <p class="panel__help">Pick an item, then click in the room to place it. Drag to move, <kbd>R</kbd> to rotate, <kbd>Del</kbd> to remove, <kbd>Esc</kbd> to cancel.</p>
+        </aside>
+
+        <section class="stage">
+            <canvas class="stage__canvas"></canvas>
+            <p class="stage__loading">Unpacking the room…</p>
+            <p class="stage__hint" hidden></p>
+
+            <div class="tools" hidden>
+                <button class="tools__button tools__button--left" type="button" aria-label="Rotate left">⟲</button>
+                <button class="tools__button tools__button--right" type="button" aria-label="Rotate right">⟳</button>
+                <button class="tools__button tools__button--delete" type="button" aria-label="Remove item">✕</button>
+            </div>
+
+            <button class="finish" type="button" disabled>Finish</button>
+        </section>
+    </main>
+
     <script type="module" src="./js/script.js"></script>
 </body>
 </html>
